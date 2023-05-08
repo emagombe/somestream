@@ -1,3 +1,45 @@
+#define LOG_TAG "A_TAG"
+
+#include <iostream>
+#include <fstream>
+#include "jni.h"
+#include <android/log.h>
+#include <vector>
+
+extern "C" {
+#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
+#include "libswresample/swresample.h"
+
+#define AUDIO_INBUF_SIZE 20480
+#define AUDIO_REFILL_THRESH 4096
+#define TAG "AudioWaveform"
+
+static void android_log_callback(void *avcl, int level, const char *fmt, va_list vl) {
+    int android_level;
+    switch (level) {
+        case AV_LOG_DEBUG:
+            android_level = ANDROID_LOG_DEBUG;
+            break;
+        case AV_LOG_INFO:
+            android_level = ANDROID_LOG_INFO;
+            break;
+        case AV_LOG_WARNING:
+            android_level = ANDROID_LOG_WARN;
+            break;
+        case AV_LOG_ERROR:
+            android_level = ANDROID_LOG_ERROR;
+            break;
+        case AV_LOG_FATAL:
+            android_level = ANDROID_LOG_FATAL;
+            break;
+        default:
+            android_level = ANDROID_LOG_VERBOSE;
+            break;
+    }
+    __android_log_vprint(android_level, "FFMPEG", fmt, vl);
+}
+
 extern "C" JNIEXPORT jfloatArray JNICALL
 Java_com_znbox_beatlevels_modules_Waveform_decode_1to_1float(JNIEnv* env, jobject thiz, jstring filePath, jstring outputPath ) {
     av_log_set_level(AV_LOG_ERROR);
